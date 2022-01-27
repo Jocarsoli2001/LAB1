@@ -45,6 +45,7 @@ uint8_t  disp_selector = 0b001;
 int unidades = 0;
 int decenas = 0;
 int dig[3];
+uint8_t Puerto_A = 0;
 
 //------------Funciones sin retorno de variables----------------------
 void setup(void);                           // Función de setup
@@ -63,13 +64,25 @@ void __interrupt() isr(void){
             divisor_hex();
         }
         else{
-            PORTB = ADRESH;                 // Si channel select = 0
+            
         }                                   //   entonces asignar PORTC = ADRESH
         PIR1bits.ADIF = 0;                  // Limpiar bander de interrupción ADC
     }
     if(T0IF){
         tmr0();                             // Mostrar displays en interrupción de Timer 0
         displays();
+    }
+    if(INTCONbits.RBIF){
+        if(RB0 == 0){
+            while(RB0 == 0);
+            PORTA += 1;
+        }
+        if(RB1 == 0){
+            while(RB1 == 0);
+            PORTA -= 1;
+        }
+        INTCONbits.RBIF = 0;
+        Puerto_A = PORTA;
     }
 }
 
@@ -90,6 +103,12 @@ void main(void) {
             __delay_us(50);
             ADCON0bits.GO = 1;              // Asignar bit GO = 1
         }
+        if(unidades > Puerto_A){
+            PORTEbits.RE2 = 1;
+        }
+        else{
+            PORTEbits.RE2 = 0;
+        }
     }
 }
 
@@ -101,6 +120,8 @@ void setup(void){
     ANSELH = 0;
     
     TRISA = 0;                              // PORTA, bit 0 y 1 como entrada analógica
+    TRISB = 0b0011;
+    
     TRISC = 0;                              // PORTC como salida
     TRISD = 0;                              // PORTD como salida                           
     TRISE = 0b0001;                         // PORTE como salida
@@ -109,6 +130,17 @@ void setup(void){
     PORTD = 0;                              // Limpiar PORTD
     PORTC = 0;                              // Limpiar PORTC
     PORTE = 0;                              // Limpiar PORTE
+    
+    //Configuración de resistencias pull-up internas
+    OPTION_REGbits.nRBPU = 0;
+    WPUBbits.WPUB0 = 1;
+    WPUBbits.WPUB1 = 1;
+    
+    //Configuración de interrupt-on-change
+    IOCBbits.IOCB0 = 1;
+    IOCBbits.IOCB1 = 1;
+    INTCONbits.RBIF = 0;
+    
     
     //Configuración de oscilador
     OSCCONbits.IRCF = 0b0110;               // Oscilador a 4 MHz = 110
@@ -136,6 +168,8 @@ void setup(void){
     //Configuración de interrupciones
     INTCONbits.T0IF = 0;                    // Habilitada la bandera de TIMER 0      
     INTCONbits.T0IE = 1;                    // Habilitar las interrupciones de TIMER 0
+    INTCONbits.RBIF = 0;                    // Habilitada la bandera de interrupción de puerto B
+    INTCONbits.RBIE = 1;                    // Habilitadas las interrupciones de puerto B
     INTCONbits.GIE = 1;                     // Habilitar interrupciones globales
     PIR1bits.ADIF = 0;                      // Limpiar bandera de interrupción del ADC
     PIE1bits.ADIE = 1;                      // Interrupción ADC = enabled

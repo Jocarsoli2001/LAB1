@@ -11,7 +11,8 @@
 #include <xc.h>                         // include processor files - each processor file is guarded.  
 
 //-------------------------Función para obtener valor de ADC-----------------------
-
+void ADC(void);
+int tabla(int a);
 
 #endif	/* ADC7seg_H */
 

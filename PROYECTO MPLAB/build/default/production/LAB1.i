@@ -2749,6 +2749,7 @@ uint8_t disp_selector = 0b001;
 int unidades = 0;
 int decenas = 0;
 int dig[3];
+uint8_t Puerto_A = 0;
 
 
 void setup(void);
@@ -2767,13 +2768,25 @@ void __attribute__((picinterrupt(("")))) isr(void){
             divisor_hex();
         }
         else{
-            PORTB = ADRESH;
+
         }
         PIR1bits.ADIF = 0;
     }
     if(T0IF){
         tmr0();
         displays();
+    }
+    if(INTCONbits.RBIF){
+        if(RB0 == 0){
+            while(RB0 == 0);
+            PORTA += 1;
+        }
+        if(RB1 == 0){
+            while(RB1 == 0);
+            PORTA -= 1;
+        }
+        INTCONbits.RBIF = 0;
+        Puerto_A = PORTA;
     }
 }
 
@@ -2794,6 +2807,12 @@ void main(void) {
             _delay((unsigned long)((50)*(4000000/4000000.0)));
             ADCON0bits.GO = 1;
         }
+        if(unidades > Puerto_A){
+            PORTEbits.RE2 = 1;
+        }
+        else{
+            PORTEbits.RE2 = 0;
+        }
     }
 }
 
@@ -2805,6 +2824,8 @@ void setup(void){
     ANSELH = 0;
 
     TRISA = 0;
+    TRISB = 0b0011;
+
     TRISC = 0;
     TRISD = 0;
     TRISE = 0b0001;
@@ -2813,6 +2834,17 @@ void setup(void){
     PORTD = 0;
     PORTC = 0;
     PORTE = 0;
+
+
+    OPTION_REGbits.nRBPU = 0;
+    WPUBbits.WPUB0 = 1;
+    WPUBbits.WPUB1 = 1;
+
+
+    IOCBbits.IOCB0 = 1;
+    IOCBbits.IOCB1 = 1;
+    INTCONbits.RBIF = 0;
+
 
 
     OSCCONbits.IRCF = 0b0110;
@@ -2840,6 +2872,8 @@ void setup(void){
 
     INTCONbits.T0IF = 0;
     INTCONbits.T0IE = 1;
+    INTCONbits.RBIF = 0;
+    INTCONbits.RBIE = 1;
     INTCONbits.GIE = 1;
     PIR1bits.ADIF = 0;
     PIE1bits.ADIE = 1;
