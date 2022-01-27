@@ -2745,26 +2745,33 @@ extern int sprintf(char *, const char *, ...);
 extern int printf(const char *, ...);
 # 35 "LAB1.c" 2
 # 44 "LAB1.c"
+int cont2 = 0;
+int cont_vol = 0;
+uint8_t digi = 0;
+uint8_t disp_selector = 0b001;
+int dig[3];
 int unidades = 0;
 int decenas = 0;
-uint8_t disp_selector = 0;
 
 
 void setup(void);
-void limite(void);
+void divisor(void);
 void tmr0(void);
 void displays(void);
 
 
 int tabla(int a);
+int tabla_p(int a);
 
 
 void __attribute__((picinterrupt(("")))) isr(void){
     if(PIR1bits.ADIF){
-        if(ADCON0bits.CHS == 5){
-            unidades = ADRESH;
+        if(ADCON0bits.CHS == 1){
+            cont_vol = 2*ADRESH;
+            divisor();
         }
-        else {
+        else{
+            PORTB = ADRESH;
         }
         PIR1bits.ADIF = 0;
     }
@@ -2780,18 +2787,17 @@ void main(void) {
     ADCON0bits.GO = 1;
     while(1){
         if(ADCON0bits.GO == 0){
-            if(ADCON0bits.CHS == 6){
-                ADCON0bits.CHS = 5;
-                _delay((unsigned long)((50)*(8000000/4000000.0)));
+            if(ADCON0bits.CHS == 1){
+                ADCON0bits.CHS = 0;
+                _delay((unsigned long)((50)*(4000000/4000000.0)));
             }
             else{
-                ADCON0bits.CHS = 6;
-                _delay((unsigned long)((50)*(8000000/4000000.0)));
+                ADCON0bits.CHS = 1;
+                _delay((unsigned long)((50)*(4000000/4000000.0)));
             }
-            _delay((unsigned long)((50)*(8000000/4000000.0)));
+            _delay((unsigned long)((50)*(4000000/4000000.0)));
             ADCON0bits.GO = 1;
         }
-        limite();
     }
 }
 
@@ -2799,44 +2805,41 @@ void main(void) {
 void setup(void){
 
 
-    ANSEL = 0b00100000;
+    ANSEL = 0b00000011;
     ANSELH = 0;
 
-
-    TRISB = 0;
-    TRISA = 0;
+    TRISA = 0b00000011;
     TRISC = 0;
     TRISD = 0;
-    TRISE = 0b001;
+    TRISE = 0;
 
     PORTA = 0;
-    PORTB = 0;
     PORTD = 0;
     PORTC = 0;
     PORTE = 0;
 
 
-    OSCCONbits.IRCF = 0b0111;
+    OSCCONbits.IRCF = 0b0110;
     OSCCONbits.SCS = 1;
 
 
     OPTION_REGbits.T0CS = 0;
     OPTION_REGbits.T0SE = 0;
-    OPTION_REGbits.PSA = 1;
-    OPTION_REGbits.PS2 = 0;
-    OPTION_REGbits.PS1 = 0;
-    OPTION_REGbits.PS0 = 0;
-    TMR0 = 156;
+    OPTION_REGbits.PSA = 0;
+    OPTION_REGbits.PS2 = 1;
+    OPTION_REGbits.PS1 = 1;
+    OPTION_REGbits.PS0 = 1;
+    TMR0 = 237;
 
 
     ADCON1bits.ADFM = 0;
     ADCON1bits.VCFG0 = 0;
     ADCON1bits.VCFG1 = 0;
 
-    ADCON0bits.ADCS = 0b10;
-    ADCON0bits.CHS = 5;
+    ADCON0bits.ADCS = 0b01;
+    ADCON0bits.CHS = 0;
     ADCON0bits.ADON = 1;
-    _delay((unsigned long)((200)*(8000000/4000000.0)));
+    _delay((unsigned long)((50)*(4000000/4000000.0)));
 
 
     INTCONbits.T0IF = 0;
@@ -2851,38 +2854,30 @@ void setup(void){
 
 void tmr0(void){
     INTCONbits.T0IF = 0;
-    TMR0 = 156;
+    TMR0 = 237;
     return;
+}
+
+void divisor(void){
+    for(int i = 0; i<3 ; i++){
+        dig[i] = cont_vol % 10;
+        cont_vol = (cont_vol - dig[i])/10;
+    }
 }
 
 void displays(void){
     PORTD = disp_selector;
     if(disp_selector == 0b001){
-        PORTC = tabla(unidades);
+        PORTC = tabla(dig[0]);
         disp_selector = 0b010;
     }
     else if(disp_selector == 0b010){
-        PORTC = tabla(decenas);
+        PORTC = tabla(dig[1]);
+        disp_selector = 0b100;
+    }
+    else if(disp_selector == 0b100){
+        PORTC = tabla_p(dig[2]);
         disp_selector = 0b001;
-    }
-}
-
-void limite(void){
-    if(unidades == 16){
-        unidades = 0;
-        decenas++;
-    }
-    if(unidades == -1){
-        unidades = 15;
-        decenas--;
-    }
-    if(unidades == -1 && decenas == -1){
-        unidades = 15;
-        decenas = 15;
-    }
-    if(decenas == 16){
-        unidades = 0;
-        decenas = 0;
     }
 }
 
@@ -2918,23 +2913,43 @@ int tabla(int a){
         case 9:
             return 0b01101111;
             break;
-        case 10:
-            return 0b01110111;
+        default:
             break;
-        case 11:
-            return 0b01111100;
+
+    }
+}
+
+int tabla_p(int a){
+    switch (a){
+        case 0:
+            return 0b10111111;
             break;
-        case 12:
-            return 0b00111001;
+        case 1:
+            return 0b10000110;
             break;
-        case 13:
-            return 0b01011110;
+        case 2:
+            return 0b11011011;
             break;
-        case 14:
-            return 0b01111001;
+        case 3:
+            return 0b11001111;
             break;
-        case 15:
-            return 0b01110001;
+        case 4:
+            return 0b11100110;
+            break;
+        case 5:
+            return 0b11101101;
+            break;
+        case 6:
+            return 0b11111101;
+            break;
+        case 7:
+            return 0b10000111;
+            break;
+        case 8:
+            return 0b11111111;
+            break;
+        case 9:
+            return 0b11101111;
             break;
         default:
             break;
