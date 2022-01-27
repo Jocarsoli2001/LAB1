@@ -1,4 +1,4 @@
-# 1 "LAB1.c"
+# 1 "ADC-7seg.c"
 # 1 "<built-in>" 1
 # 1 "<built-in>" 3
 # 288 "<built-in>" 3
@@ -6,29 +6,9 @@
 # 1 "<built-in>" 2
 # 1 "C:/Program Files/Microchip/MPLABX/v5.50/packs/Microchip/PIC16Fxxx_DFP/1.2.33/xc8\\pic\\include\\language_support.h" 1 3
 # 2 "<built-in>" 2
-# 1 "LAB1.c" 2
-# 13 "LAB1.c"
-#pragma config FOSC = INTRC_NOCLKOUT
-#pragma config WDTE = OFF
-#pragma config PWRTE = OFF
-#pragma config MCLRE = OFF
-#pragma config CP = OFF
-#pragma config CPD = OFF
-#pragma config BOREN = OFF
-#pragma config IESO = OFF
-#pragma config FCMEN = OFF
-#pragma config LVP = OFF
-
-
-#pragma config BOR4V = BOR40V
-#pragma config WRT = OFF
-
-
-
-
-
-
-
+# 1 "ADC-7seg.c" 2
+# 1 "./ADC-7seg.h" 1
+# 11 "./ADC-7seg.h"
 # 1 "C:/Program Files/Microchip/MPLABX/v5.50/packs/Microchip/PIC16Fxxx_DFP/1.2.33/xc8\\pic\\include\\xc.h" 1 3
 # 18 "C:/Program Files/Microchip/MPLABX/v5.50/packs/Microchip/PIC16Fxxx_DFP/1.2.33/xc8\\pic\\include\\xc.h" 3
 extern const char __xc8_OPTIM_SPEED;
@@ -2509,7 +2489,8 @@ extern __bank0 unsigned char __resetbits;
 extern __bank0 __bit __powerdown;
 extern __bank0 __bit __timeout;
 # 28 "C:/Program Files/Microchip/MPLABX/v5.50/packs/Microchip/PIC16Fxxx_DFP/1.2.33/xc8\\pic\\include\\xc.h" 2 3
-# 33 "LAB1.c" 2
+# 11 "./ADC-7seg.h" 2
+
 
 # 1 "C:\\Program Files\\Microchip\\xc8\\v2.32\\pic\\include\\c90\\stdint.h" 1 3
 # 13 "C:\\Program Files\\Microchip\\xc8\\v2.32\\pic\\include\\c90\\stdint.h" 3
@@ -2644,7 +2625,7 @@ typedef int16_t intptr_t;
 
 
 typedef uint16_t uintptr_t;
-# 34 "LAB1.c" 2
+# 13 "./ADC-7seg.h" 2
 
 # 1 "C:\\Program Files\\Microchip\\xc8\\v2.32\\pic\\include\\c90\\stdio.h" 1 3
 
@@ -2743,14 +2724,7 @@ extern int vsscanf(const char *, const char *, va_list) __attribute__((unsupport
 #pragma printf_check(sprintf) const
 extern int sprintf(char *, const char *, ...);
 extern int printf(const char *, ...);
-# 35 "LAB1.c" 2
-
-
-# 1 "./ADC-7seg.h" 1
-# 13 "./ADC-7seg.h"
-# 1 "C:\\Program Files\\Microchip\\xc8\\v2.32\\pic\\include\\c90\\stdint.h" 1 3
-# 13 "./ADC-7seg.h" 2
-
+# 14 "./ADC-7seg.h" 2
 
 
 
@@ -2763,146 +2737,78 @@ uint8_t Puerto_A = 0;
 
 void ADC(void);
 int tabla(int a);
-# 37 "LAB1.c" 2
-# 49 "LAB1.c"
-void setup(void);
-void tmr0(void);
-void displays(void);
+# 1 "ADC-7seg.c" 2
 
 
 
-
-void __attribute__((picinterrupt(("")))) isr(void){
-    if(PIR1bits.ADIF){
-        ADC();
-    }
-    if(T0IF){
-        tmr0();
-        displays();
-    }
-    if(INTCONbits.RBIF){
-        if(RB0 == 0){
-            while(RB0 == 0);
-            PORTA += 1;
-        }
-        if(RB1 == 0){
-            while(RB1 == 0);
-            PORTA -= 1;
-        }
-        INTCONbits.RBIF = 0;
-
-    }
-}
-
-
-void main(void) {
-    setup();
-    ADCON0bits.GO = 1;
-    while(1){
-        if(ADCON0bits.GO == 0){
-            if(ADCON0bits.CHS == 9){
-                ADCON0bits.CHS = 8;
-                _delay((unsigned long)((50)*(4000000/4000000.0)));
-            }
-            else{
-                ADCON0bits.CHS = 9;
-                _delay((unsigned long)((50)*(4000000/4000000.0)));
-            }
-            _delay((unsigned long)((50)*(4000000/4000000.0)));
-            ADCON0bits.GO = 1;
-        }
-        if(ADRESH > PORTA){
-            PORTEbits.RE0 = 1;
-        }
-        else{
-            PORTEbits.RE0 = 0;
+void ADC(void) {
+    if(ADCON0bits.CHS == 8){
+        unidades = ADRESH;
+        for(int i = 0; i<3 ; i++){
+            dig[i] = unidades % 16;
+            unidades = (unidades - dig[i])/16;
         }
     }
-    return;
-}
+    else{
 
-
-void setup(void){
-
-
-    ANSEL = 0b1000000000;
-    ANSELH = 0;
-
-    TRISA = 0;
-    TRISB = 0b0111;
-
-    TRISC = 0;
-    TRISD = 0;
-    TRISE = 0;
-
-    PORTA = 0;
-    PORTD = 0;
-    PORTC = 0;
-    PORTE = 0;
-
-
-    OPTION_REGbits.nRBPU = 0;
-    WPUBbits.WPUB0 = 1;
-    WPUBbits.WPUB1 = 1;
-
-
-    IOCBbits.IOCB0 = 1;
-    IOCBbits.IOCB1 = 1;
-    INTCONbits.RBIF = 0;
-
-
-
-    OSCCONbits.IRCF = 0b0110;
-    OSCCONbits.SCS = 1;
-
-
-    OPTION_REGbits.T0CS = 0;
-    OPTION_REGbits.T0SE = 0;
-    OPTION_REGbits.PSA = 0;
-    OPTION_REGbits.PS2 = 1;
-    OPTION_REGbits.PS1 = 1;
-    OPTION_REGbits.PS0 = 1;
-    TMR0 = 237;
-
-
-    ADCON1bits.ADFM = 0;
-    ADCON1bits.VCFG0 = 0;
-    ADCON1bits.VCFG1 = 0;
-
-    ADCON0bits.ADCS = 0b01;
-    ADCON0bits.CHS = 5;
-    ADCON0bits.ADON = 1;
-    _delay((unsigned long)((50)*(4000000/4000000.0)));
-
-
-    INTCONbits.T0IF = 0;
-    INTCONbits.T0IE = 1;
-    INTCONbits.RBIF = 0;
-    INTCONbits.RBIE = 1;
-    INTCONbits.GIE = 1;
+    }
     PIR1bits.ADIF = 0;
-    PIE1bits.ADIE = 1;
-    INTCONbits.PEIE = 1;
 
-    return;
-}
-
-void tmr0(void){
-    INTCONbits.T0IF = 0;
-    TMR0 = 237;
-    return;
 }
 
 
-void displays(void){
-    PORTD = disp_selector;
-    if(disp_selector == 0b001){
-        PORTC = tabla(dig[0]);
-        disp_selector = 0b010;
+int tabla(int a){
+    switch (a){
+        case 0:
+            return 0b00111111;
+            break;
+        case 1:
+            return 0b00000110;
+            break;
+        case 2:
+            return 0b01011011;
+            break;
+        case 3:
+            return 0b01001111;
+            break;
+        case 4:
+            return 0b01100110;
+            break;
+        case 5:
+            return 0b01101101;
+            break;
+        case 6:
+            return 0b01111101;
+            break;
+        case 7:
+            return 0b00000111;
+            break;
+        case 8:
+            return 0b01111111;
+            break;
+        case 9:
+            return 0b01101111;
+            break;
+        case 10:
+            return 0b01110111;
+            break;
+        case 11:
+            return 0b01111100;
+            break;
+        case 12:
+            return 0b00111001;
+            break;
+        case 13:
+            return 0b01011110;
+            break;
+        case 14:
+            return 0b01111001;
+            break;
+        case 15:
+            return 0b01110001;
+            break;
+        default:
+            break;
+
     }
-    else if(disp_selector == 0b010){
-        PORTC = tabla(dig[1]);
-        disp_selector = 0b001;
-    }
-    return;
 }
