@@ -14,15 +14,15 @@
 #include <stdio.h>
 
 //-------------------------Variables-----------------------------------------------
-uint8_t  disp_selector = 0b001;
-int unidades = 0;
-int decenas = 0;
-int dig[3];
-uint8_t Puerto_A = 0;
+uint8_t  disp_selector = 0b001;         // Variable para seleccionar el display adecuado
+int unidades = 0;                       // Variable unidades que guarda el valor de ADRESH
+int decenas = 0;                        // Variable que se muestra en segundo display
+int dig[3];                             // Array para descomponer números en dígitos
+uint8_t Puerto_A = 0;                   // Variable que guarda valor de PORTA
 
 //-------------------------Función para obtener valor de ADC-----------------------
-void ADC(void);
-int tabla(int a);
+void ADC(void);                         // Función para extraer valor de POT
+int tabla(int a);                       // Función de traducción a display de 7 segmentos
 
 #endif	/* ADC7seg_H */
 

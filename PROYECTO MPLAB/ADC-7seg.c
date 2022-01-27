@@ -11,7 +11,7 @@ void ADC(void) {
     }
     else{
             
-    }                                               //   entonces asignar PORTC = ADRESH
+    }                                               
     PIR1bits.ADIF = 0;                              // Limpiar bander de interrupción ADC
     
 }

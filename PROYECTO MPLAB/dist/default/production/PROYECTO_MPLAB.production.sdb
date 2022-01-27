@@ -21,11 +21,11 @@
 [v _isr isr `II(v  1 e 1 0 ]
 "79
 [v _main main `(v  1 e 1 0 ]
-"106
+"105
 [v _setup setup `(v  1 e 1 0 ]
-"171
+"170
 [v _tmr0 tmr0 `(v  1 e 1 0 ]
-"178
+"177
 [v _displays displays `(v  1 e 1 0 ]
 "17 D:\Archivos\Documentos\Universidad y colegio\UVG\2022\Primer Semestre\Electrónica digital 2\Laboratorios\LAB1\PROYECTO MPLAB/ADC-7seg.h
 [v _disp_selector disp_selector `uc  1 e 1 0 ]
@@ -203,27 +203,27 @@
 "79 D:\Archivos\Documentos\Universidad y colegio\UVG\2022\Primer Semestre\Electrónica digital 2\Laboratorios\LAB1\PROYECTO MPLAB\LAB1.c
 [v _main main `(v  1 e 1 0 ]
 {
-"103
+"102
 } 0
-"106
+"105
 [v _setup setup `(v  1 e 1 0 ]
 {
-"169
+"168
 } 0
 "56
 [v _isr isr `II(v  1 e 1 0 ]
 {
 "76
 } 0
-"171
+"170
 [v _tmr0 tmr0 `(v  1 e 1 0 ]
 {
-"175
+"174
 } 0
-"178
+"177
 [v _displays displays `(v  1 e 1 0 ]
 {
-"189
+"188
 } 0
 "20 D:\Archivos\Documentos\Universidad y colegio\UVG\2022\Primer Semestre\Electrónica digital 2\Laboratorios\LAB1\PROYECTO MPLAB\ADC-7seg.c
 [v _tabla tabla `(i  1 e 2 0 ]

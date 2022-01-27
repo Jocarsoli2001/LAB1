@@ -667,210 +667,207 @@ Version 4.0 HI-TECH Software Intermediate Code
 [e $U 153  ]
 [e :U 154 ]
 "102
-[; ;LAB1.c: 102:     return;
-[e $UE 151  ]
-"103
-[; ;LAB1.c: 103: }
+[; ;LAB1.c: 102: }
 [e :UE 151 ]
 }
-"106
-[; ;LAB1.c: 106: void setup(void){
+"105
+[; ;LAB1.c: 105: void setup(void){
 [v _setup `(v ~T0 @X0 1 ef ]
 {
 [e :U _setup ]
 [f ]
-"109
-[; ;LAB1.c: 109:     ANSEL = 0b1000000000;
+"108
+[; ;LAB1.c: 108:     ANSEL = 0b1000000000;
 [e = _ANSEL -> -> 512 `i `uc ]
-"110
-[; ;LAB1.c: 110:     ANSELH = 0;
+"109
+[; ;LAB1.c: 109:     ANSELH = 0;
 [e = _ANSELH -> -> 0 `i `uc ]
-"112
-[; ;LAB1.c: 112:     TRISA = 0;
+"111
+[; ;LAB1.c: 111:     TRISA = 0;
 [e = _TRISA -> -> 0 `i `uc ]
-"113
-[; ;LAB1.c: 113:     TRISB = 0b0111;
+"112
+[; ;LAB1.c: 112:     TRISB = 0b0111;
 [e = _TRISB -> -> 7 `i `uc ]
-"115
-[; ;LAB1.c: 115:     TRISC = 0;
+"114
+[; ;LAB1.c: 114:     TRISC = 0;
 [e = _TRISC -> -> 0 `i `uc ]
-"116
-[; ;LAB1.c: 116:     TRISD = 0;
+"115
+[; ;LAB1.c: 115:     TRISD = 0;
 [e = _TRISD -> -> 0 `i `uc ]
-"117
-[; ;LAB1.c: 117:     TRISE = 0;
+"116
+[; ;LAB1.c: 116:     TRISE = 0;
 [e = _TRISE -> -> 0 `i `uc ]
-"119
-[; ;LAB1.c: 119:     PORTA = 0;
+"118
+[; ;LAB1.c: 118:     PORTA = 0;
 [e = _PORTA -> -> 0 `i `uc ]
-"120
-[; ;LAB1.c: 120:     PORTD = 0;
+"119
+[; ;LAB1.c: 119:     PORTD = 0;
 [e = _PORTD -> -> 0 `i `uc ]
-"121
-[; ;LAB1.c: 121:     PORTC = 0;
+"120
+[; ;LAB1.c: 120:     PORTC = 0;
 [e = _PORTC -> -> 0 `i `uc ]
-"122
-[; ;LAB1.c: 122:     PORTE = 0;
+"121
+[; ;LAB1.c: 121:     PORTE = 0;
 [e = _PORTE -> -> 0 `i `uc ]
-"125
-[; ;LAB1.c: 125:     OPTION_REGbits.nRBPU = 0;
+"124
+[; ;LAB1.c: 124:     OPTION_REGbits.nRBPU = 0;
 [e = . . _OPTION_REGbits 0 5 -> -> 0 `i `uc ]
-"126
-[; ;LAB1.c: 126:     WPUBbits.WPUB0 = 1;
+"125
+[; ;LAB1.c: 125:     WPUBbits.WPUB0 = 1;
 [e = . . _WPUBbits 1 0 -> -> 1 `i `uc ]
-"127
-[; ;LAB1.c: 127:     WPUBbits.WPUB1 = 1;
+"126
+[; ;LAB1.c: 126:     WPUBbits.WPUB1 = 1;
 [e = . . _WPUBbits 1 1 -> -> 1 `i `uc ]
-"130
-[; ;LAB1.c: 130:     IOCBbits.IOCB0 = 1;
+"129
+[; ;LAB1.c: 129:     IOCBbits.IOCB0 = 1;
 [e = . . _IOCBbits 1 0 -> -> 1 `i `uc ]
-"131
-[; ;LAB1.c: 131:     IOCBbits.IOCB1 = 1;
+"130
+[; ;LAB1.c: 130:     IOCBbits.IOCB1 = 1;
 [e = . . _IOCBbits 1 1 -> -> 1 `i `uc ]
-"132
-[; ;LAB1.c: 132:     INTCONbits.RBIF = 0;
+"131
+[; ;LAB1.c: 131:     INTCONbits.RBIF = 0;
 [e = . . _INTCONbits 0 0 -> -> 0 `i `uc ]
-"136
-[; ;LAB1.c: 136:     OSCCONbits.IRCF = 0b0110;
+"135
+[; ;LAB1.c: 135:     OSCCONbits.IRCF = 0b0110;
 [e = . . _OSCCONbits 0 4 -> -> 6 `i `uc ]
-"137
-[; ;LAB1.c: 137:     OSCCONbits.SCS = 1;
+"136
+[; ;LAB1.c: 136:     OSCCONbits.SCS = 1;
 [e = . . _OSCCONbits 0 0 -> -> 1 `i `uc ]
-"140
-[; ;LAB1.c: 140:     OPTION_REGbits.T0CS = 0;
+"139
+[; ;LAB1.c: 139:     OPTION_REGbits.T0CS = 0;
 [e = . . _OPTION_REGbits 0 3 -> -> 0 `i `uc ]
-"141
-[; ;LAB1.c: 141:     OPTION_REGbits.T0SE = 0;
+"140
+[; ;LAB1.c: 140:     OPTION_REGbits.T0SE = 0;
 [e = . . _OPTION_REGbits 0 2 -> -> 0 `i `uc ]
-"142
-[; ;LAB1.c: 142:     OPTION_REGbits.PSA = 0;
+"141
+[; ;LAB1.c: 141:     OPTION_REGbits.PSA = 0;
 [e = . . _OPTION_REGbits 0 1 -> -> 0 `i `uc ]
-"143
-[; ;LAB1.c: 143:     OPTION_REGbits.PS2 = 1;
+"142
+[; ;LAB1.c: 142:     OPTION_REGbits.PS2 = 1;
 [e = . . _OPTION_REGbits 1 2 -> -> 1 `i `uc ]
-"144
-[; ;LAB1.c: 144:     OPTION_REGbits.PS1 = 1;
+"143
+[; ;LAB1.c: 143:     OPTION_REGbits.PS1 = 1;
 [e = . . _OPTION_REGbits 1 1 -> -> 1 `i `uc ]
-"145
-[; ;LAB1.c: 145:     OPTION_REGbits.PS0 = 1;
+"144
+[; ;LAB1.c: 144:     OPTION_REGbits.PS0 = 1;
 [e = . . _OPTION_REGbits 1 0 -> -> 1 `i `uc ]
-"146
-[; ;LAB1.c: 146:     TMR0 = 237;
+"145
+[; ;LAB1.c: 145:     TMR0 = 237;
 [e = _TMR0 -> -> 237 `i `uc ]
-"149
-[; ;LAB1.c: 149:     ADCON1bits.ADFM = 0;
+"148
+[; ;LAB1.c: 148:     ADCON1bits.ADFM = 0;
 [e = . . _ADCON1bits 0 4 -> -> 0 `i `uc ]
-"150
-[; ;LAB1.c: 150:     ADCON1bits.VCFG0 = 0;
+"149
+[; ;LAB1.c: 149:     ADCON1bits.VCFG0 = 0;
 [e = . . _ADCON1bits 0 1 -> -> 0 `i `uc ]
-"151
-[; ;LAB1.c: 151:     ADCON1bits.VCFG1 = 0;
+"150
+[; ;LAB1.c: 150:     ADCON1bits.VCFG1 = 0;
 [e = . . _ADCON1bits 0 2 -> -> 0 `i `uc ]
-"153
-[; ;LAB1.c: 153:     ADCON0bits.ADCS = 0b01;
+"152
+[; ;LAB1.c: 152:     ADCON0bits.ADCS = 0b01;
 [e = . . _ADCON0bits 0 3 -> -> 1 `i `uc ]
-"154
-[; ;LAB1.c: 154:     ADCON0bits.CHS = 5;
+"153
+[; ;LAB1.c: 153:     ADCON0bits.CHS = 5;
 [e = . . _ADCON0bits 0 2 -> -> 5 `i `uc ]
-"155
-[; ;LAB1.c: 155:     ADCON0bits.ADON = 1;
+"154
+[; ;LAB1.c: 154:     ADCON0bits.ADON = 1;
 [e = . . _ADCON0bits 0 0 -> -> 1 `i `uc ]
-"156
-[; ;LAB1.c: 156:     _delay((unsigned long)((50)*(4000000/4000000.0)));
+"155
+[; ;LAB1.c: 155:     _delay((unsigned long)((50)*(4000000/4000000.0)));
 [e ( __delay (1 -> * -> -> 50 `i `d / -> -> 4000000 `l `d .4000000.0 `ul ]
-"159
-[; ;LAB1.c: 159:     INTCONbits.T0IF = 0;
+"158
+[; ;LAB1.c: 158:     INTCONbits.T0IF = 0;
 [e = . . _INTCONbits 0 2 -> -> 0 `i `uc ]
-"160
-[; ;LAB1.c: 160:     INTCONbits.T0IE = 1;
+"159
+[; ;LAB1.c: 159:     INTCONbits.T0IE = 1;
 [e = . . _INTCONbits 0 5 -> -> 1 `i `uc ]
-"161
-[; ;LAB1.c: 161:     INTCONbits.RBIF = 0;
+"160
+[; ;LAB1.c: 160:     INTCONbits.RBIF = 0;
 [e = . . _INTCONbits 0 0 -> -> 0 `i `uc ]
-"162
-[; ;LAB1.c: 162:     INTCONbits.RBIE = 1;
+"161
+[; ;LAB1.c: 161:     INTCONbits.RBIE = 1;
 [e = . . _INTCONbits 0 3 -> -> 1 `i `uc ]
-"163
-[; ;LAB1.c: 163:     INTCONbits.GIE = 1;
+"162
+[; ;LAB1.c: 162:     INTCONbits.GIE = 1;
 [e = . . _INTCONbits 0 7 -> -> 1 `i `uc ]
-"164
-[; ;LAB1.c: 164:     PIR1bits.ADIF = 0;
+"163
+[; ;LAB1.c: 163:     PIR1bits.ADIF = 0;
 [e = . . _PIR1bits 0 6 -> -> 0 `i `uc ]
-"165
-[; ;LAB1.c: 165:     PIE1bits.ADIE = 1;
+"164
+[; ;LAB1.c: 164:     PIE1bits.ADIE = 1;
 [e = . . _PIE1bits 0 6 -> -> 1 `i `uc ]
-"166
-[; ;LAB1.c: 166:     INTCONbits.PEIE = 1;
+"165
+[; ;LAB1.c: 165:     INTCONbits.PEIE = 1;
 [e = . . _INTCONbits 0 6 -> -> 1 `i `uc ]
-"168
-[; ;LAB1.c: 168:     return;
+"167
+[; ;LAB1.c: 167:     return;
 [e $UE 160  ]
-"169
-[; ;LAB1.c: 169: }
+"168
+[; ;LAB1.c: 168: }
 [e :UE 160 ]
 }
-"171
-[; ;LAB1.c: 171: void tmr0(void){
+"170
+[; ;LAB1.c: 170: void tmr0(void){
 [v _tmr0 `(v ~T0 @X0 1 ef ]
 {
 [e :U _tmr0 ]
 [f ]
-"172
-[; ;LAB1.c: 172:     INTCONbits.T0IF = 0;
+"171
+[; ;LAB1.c: 171:     INTCONbits.T0IF = 0;
 [e = . . _INTCONbits 0 2 -> -> 0 `i `uc ]
-"173
-[; ;LAB1.c: 173:     TMR0 = 237;
+"172
+[; ;LAB1.c: 172:     TMR0 = 237;
 [e = _TMR0 -> -> 237 `i `uc ]
-"174
-[; ;LAB1.c: 174:     return;
+"173
+[; ;LAB1.c: 173:     return;
 [e $UE 161  ]
-"175
-[; ;LAB1.c: 175: }
+"174
+[; ;LAB1.c: 174: }
 [e :UE 161 ]
 }
-"178
-[; ;LAB1.c: 178: void displays(void){
+"177
+[; ;LAB1.c: 177: void displays(void){
 [v _displays `(v ~T0 @X0 1 ef ]
 {
 [e :U _displays ]
 [f ]
-"179
-[; ;LAB1.c: 179:     PORTD = disp_selector;
+"178
+[; ;LAB1.c: 178:     PORTD = disp_selector;
 [e = _PORTD _disp_selector ]
-"180
-[; ;LAB1.c: 180:     if(disp_selector == 0b001){
+"179
+[; ;LAB1.c: 179:     if(disp_selector == 0b001){
 [e $ ! == -> _disp_selector `i -> 1 `i 163  ]
 {
-"181
-[; ;LAB1.c: 181:         PORTC = tabla(dig[0]);
+"180
+[; ;LAB1.c: 180:         PORTC = tabla(dig[0]);
 [e = _PORTC -> ( _tabla (1 *U + &U _dig * -> -> -> 0 `i `ui `ux -> -> # *U &U _dig `ui `ux `uc ]
-"182
-[; ;LAB1.c: 182:         disp_selector = 0b010;
+"181
+[; ;LAB1.c: 181:         disp_selector = 0b010;
 [e = _disp_selector -> -> 2 `i `uc ]
-"183
-[; ;LAB1.c: 183:     }
+"182
+[; ;LAB1.c: 182:     }
 }
 [e $U 164  ]
-"184
-[; ;LAB1.c: 184:     else if(disp_selector == 0b010){
+"183
+[; ;LAB1.c: 183:     else if(disp_selector == 0b010){
 [e :U 163 ]
 [e $ ! == -> _disp_selector `i -> 2 `i 165  ]
 {
-"185
-[; ;LAB1.c: 185:         PORTC = tabla(dig[1]);
+"184
+[; ;LAB1.c: 184:         PORTC = tabla(dig[1]);
 [e = _PORTC -> ( _tabla (1 *U + &U _dig * -> -> -> 1 `i `ui `ux -> -> # *U &U _dig `ui `ux `uc ]
-"186
-[; ;LAB1.c: 186:         disp_selector = 0b001;
+"185
+[; ;LAB1.c: 185:         disp_selector = 0b001;
 [e = _disp_selector -> -> 1 `i `uc ]
-"187
-[; ;LAB1.c: 187:     }
+"186
+[; ;LAB1.c: 186:     }
 }
 [e :U 165 ]
 [e :U 164 ]
-"188
-[; ;LAB1.c: 188:     return;
+"187
+[; ;LAB1.c: 187:     return;
 [e $UE 162  ]
-"189
-[; ;LAB1.c: 189: }
+"188
+[; ;LAB1.c: 188: }
 [e :UE 162 ]
 }

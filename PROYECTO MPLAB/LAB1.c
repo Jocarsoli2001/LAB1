@@ -55,22 +55,22 @@ void displays(void);                        // Función para alternar valores mo
 //----------------------Interrupciones--------------------------------
 void __interrupt() isr(void){
     if(PIR1bits.ADIF){
-        ADC();
+        ADC();                              //Extraer valor de ADC por medio de función en librería
     }
     if(T0IF){
-        tmr0();                             // Mostrar displays en interrupción de Timer 0
-        displays();
+        tmr0();                             // Reiniciar TMR0                    
+        displays();                         // Función que permite el multiplexeado de displays
     }
-    if(INTCONbits.RBIF){
-        if(RB0 == 0){
-            while(RB0 == 0);
-            PORTA += 1;
+    if(INTCONbits.RBIF){                    // Ejecutar Interrupción on-change
+        if(RB0 == 0){                       // Si botón en bit 0 de puerto B es 0
+            while(RB0 == 0);                //      Antirebote de botón
+            PORTA += 1;                     //      Incrementar puerto A
         }
-        if(RB1 == 0){
-            while(RB1 == 0);
-            PORTA -= 1;
-        }
-        INTCONbits.RBIF = 0;
+        if(RB1 == 0){                       // Si botón en bit 1 de puerto B es 0
+            while(RB1 == 0);                //      Antirebote de botón
+            PORTA -= 1;                     //      Decrementar puerto A
+        }       
+        INTCONbits.RBIF = 0;                // Reiniciar bandera de Interrupt-on-change
         
     }
 }
@@ -92,14 +92,13 @@ void main(void) {
             __delay_us(50);
             ADCON0bits.GO = 1;              // Asignar bit GO = 1
         }
-        if(ADRESH > PORTA){
-            PORTEbits.RE0 = 1;
+        if(ADRESH > PORTA){                 // Evaluar si el valor extraido de ADC es mayor al contador controlado por botones
+            PORTEbits.RE0 = 1;              // Prender bit 0 de puerto E
         }
-        else{
-            PORTEbits.RE0 = 0;
+        else{                               // De lo contrario,
+            PORTEbits.RE0 = 0;              //      apagar bit 0 de puerto E    
         }  
     }
-    return;
 }
 
 //----------------------Subrutinas--------------------------------
@@ -109,8 +108,8 @@ void setup(void){
     ANSEL = 0b1000000000;                   // Pines 0 y 1 de PORTA como analógicos
     ANSELH = 0;
     
-    TRISA = 0;                              // PORTB, bit 0, 1, 2 como entrada analógica
-    TRISB = 0b0111;
+    TRISA = 0;                              // PORTB, bit 2 como entrada analógica
+    TRISB = 0b0111;                         // PORB, bit 0 y 1 como entrada digital por resistencia pull up
     
     TRISC = 0;                              // PORTC como salida
     TRISD = 0;                              // PORTD como salida                           

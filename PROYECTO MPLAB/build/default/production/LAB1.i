@@ -2818,7 +2818,6 @@ void main(void) {
             PORTEbits.RE0 = 0;
         }
     }
-    return;
 }
 
 
