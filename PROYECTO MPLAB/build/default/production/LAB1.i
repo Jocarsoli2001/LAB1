@@ -2745,47 +2745,38 @@ extern int sprintf(char *, const char *, ...);
 extern int printf(const char *, ...);
 # 35 "LAB1.c" 2
 # 44 "LAB1.c"
-char cont = 0;
-int limite = 0;
+int cont2 = 0;
+int cont_vol = 0;
+uint8_t disp_selector = 0b001;
+int unidades = 0;
+int decenas = 0;
+int dig[3];
 
 
 void setup(void);
+void limite(void);
 void divisor(void);
 void tmr0(void);
 void displays(void);
 
 
 int tabla(int a);
-int tabla_p(int a);
 
 
 void __attribute__((picinterrupt(("")))) isr(void){
     if(PIR1bits.ADIF){
-        if(ADCON0bits.CHS == 1){
-            CCPR2L = (ADRESH>>1)+124;
-            CCP2CONbits.DC2B1 = ADRESH & 0b01;
-            CCP2CONbits.DC2B0 = (ADRESL>>7);
-
+        if(ADCON0bits.CHS == 5){
+            unidades = ADRESH;
+            divisor();
         }
-        else if (ADCON0bits.CHS == 0){
-            CCPR1L = (ADRESH>>1)+124;
-            CCP1CONbits.DC1B1 = ADRESH & 0b01;
-            CCP1CONbits.DC1B0 = (ADRESL>>7);
-        }
-        else if (ADCON0bits.CHS == 2){
-            limite = ADRESH;
+        else{
+            PORTB = ADRESH;
         }
         PIR1bits.ADIF = 0;
     }
     if(T0IF){
         tmr0();
-        cont++;
-        if(cont >= limite){
-            PORTCbits.RC3 = 0;
-        }
-        else {
-            PORTCbits.RC3 = 1;
-        }
+        displays();
     }
 }
 
@@ -2795,19 +2786,15 @@ void main(void) {
     ADCON0bits.GO = 1;
     while(1){
         if(ADCON0bits.GO == 0){
-            if(ADCON0bits.CHS == 2){
-                ADCON0bits.CHS = 1;
-                _delay((unsigned long)((50)*(8000000/4000000.0)));
+            if(ADCON0bits.CHS == 6){
+                ADCON0bits.CHS = 5;
+                _delay((unsigned long)((50)*(4000000/4000000.0)));
             }
-            else if (ADCON0bits.CHS == 1){
-                ADCON0bits.CHS = 0;
-                _delay((unsigned long)((50)*(8000000/4000000.0)));
+            else{
+                ADCON0bits.CHS = 6;
+                _delay((unsigned long)((50)*(4000000/4000000.0)));
             }
-            else {
-                ADCON0bits.CHS = 2;
-                _delay((unsigned long)((50)*(8000000/4000000.0)));
-            }
-            _delay((unsigned long)((50)*(8000000/4000000.0)));
+            _delay((unsigned long)((50)*(4000000/4000000.0)));
             ADCON0bits.GO = 1;
         }
     }
@@ -2817,40 +2804,41 @@ void main(void) {
 void setup(void){
 
 
-    ANSEL = 0b00000111;
+    ANSEL = 0b00100000;
     ANSELH = 0;
 
-    TRISA = 0b00000111;
+    TRISA = 0;
     TRISC = 0;
     TRISD = 0;
-    TRISE = 0;
+    TRISE = 0b0001;
 
+    PORTA = 0;
     PORTD = 0;
     PORTC = 0;
     PORTE = 0;
 
 
-    OSCCONbits.IRCF = 0b0111;
+    OSCCONbits.IRCF = 0b0110;
     OSCCONbits.SCS = 1;
 
 
     OPTION_REGbits.T0CS = 0;
     OPTION_REGbits.T0SE = 0;
-    OPTION_REGbits.PSA = 1;
-    OPTION_REGbits.PS2 = 0;
-    OPTION_REGbits.PS1 = 0;
-    OPTION_REGbits.PS0 = 0;
-    TMR0 = 156;
+    OPTION_REGbits.PSA = 0;
+    OPTION_REGbits.PS2 = 1;
+    OPTION_REGbits.PS1 = 1;
+    OPTION_REGbits.PS0 = 1;
+    TMR0 = 237;
 
 
     ADCON1bits.ADFM = 0;
     ADCON1bits.VCFG0 = 0;
     ADCON1bits.VCFG1 = 0;
 
-    ADCON0bits.ADCS = 0b10;
-    ADCON0bits.CHS = 0;
+    ADCON0bits.ADCS = 0b01;
+    ADCON0bits.CHS = 5;
     ADCON0bits.ADON = 1;
-    _delay((unsigned long)((200)*(8000000/4000000.0)));
+    _delay((unsigned long)((50)*(4000000/4000000.0)));
 
 
     INTCONbits.T0IF = 0;
@@ -2860,36 +2848,86 @@ void setup(void){
     PIE1bits.ADIE = 1;
     INTCONbits.PEIE = 1;
 
-
-    TRISCbits.TRISC2 = 1;
-    TRISCbits.TRISC1 = 1;
-    PR2 = 255;
-    CCP1CONbits.P1M = 0;
-    CCP1CONbits.CCP1M = 0b1100;
-    CCP2CONbits.CCP2M = 0b1100;
-
-    CCPR1L = 0x0f;
-    CCPR2L = 0x0f;
-    CCP2CONbits.DC2B0 = 0;
-    CCP2CONbits.DC2B1 = 0;
-    CCP1CONbits.DC1B = 0;
-
-
-    PIR1bits.TMR2IF = 0;
-    T2CONbits.T2CKPS = 0b11;
-    T2CONbits.TMR2ON = 1;
-
-    while(PIR1bits.TMR2IF == 0);
-    PIR1bits.TMR2IF = 0;
-
-    TRISCbits.TRISC2 = 0;
-    TRISCbits.TRISC1 = 0;
-
     return;
 }
 
 void tmr0(void){
     INTCONbits.T0IF = 0;
-    TMR0 = 156;
+    TMR0 = 237;
     return;
+}
+
+void divisor(void){
+    for(int i = 0; i<3 ; i++){
+        dig[i] = unidades % 16;
+        unidades = (unidades - dig[i])/16;
+    }
+}
+
+void displays(void){
+    PORTD = disp_selector;
+    if(disp_selector == 0b001){
+        PORTC = tabla(dig[0]);
+        disp_selector = 0b010;
+    }
+    else if(disp_selector == 0b010){
+        PORTC = tabla(dig[1]);
+        disp_selector = 0b001;
+    }
+}
+
+int tabla(int a){
+    switch (a){
+        case 0:
+            return 0b00111111;
+            break;
+        case 1:
+            return 0b00000110;
+            break;
+        case 2:
+            return 0b01011011;
+            break;
+        case 3:
+            return 0b01001111;
+            break;
+        case 4:
+            return 0b01100110;
+            break;
+        case 5:
+            return 0b01101101;
+            break;
+        case 6:
+            return 0b01111101;
+            break;
+        case 7:
+            return 0b00000111;
+            break;
+        case 8:
+            return 0b01111111;
+            break;
+        case 9:
+            return 0b01101111;
+            break;
+        case 10:
+            return 0b01110111;
+            break;
+        case 11:
+            return 0b01111100;
+            break;
+        case 12:
+            return 0b00111001;
+            break;
+        case 13:
+            return 0b01011110;
+            break;
+        case 14:
+            return 0b01111001;
+            break;
+        case 15:
+            return 0b01110001;
+            break;
+        default:
+            break;
+
+    }
 }

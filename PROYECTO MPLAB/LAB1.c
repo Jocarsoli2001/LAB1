@@ -35,77 +35,64 @@
 #include <stdio.h>
 
 //-----------------Definición de frecuencia de cristal---------------
-#define _XTAL_FREQ 8000000
+#define _XTAL_FREQ 4000000
 
 //-----------------------Constantes----------------------------------
-#define  valor_tmr0 156                        // valor_tmr0 = 156 (0.05 ms)
+#define  valor_tmr0 237                    // valor_tmr0 = 237
 
 //-----------------------Variables------------------------------------
-char cont = 0;
-int limite = 0;
+int cont2 = 0;
+int cont_vol = 0;
+uint8_t  disp_selector = 0b001;
+int unidades = 0;
+int decenas = 0;
+int dig[3];
 
 //------------Funciones sin retorno de variables----------------------
-void setup(void);                               // Función de setup
-void divisor(void);                             // Función para dividir números en dígitos
-void tmr0(void);                                // Función para reiniciar TMR0
-void displays(void);                            // Función para alternar valores mostrados en displays
+void setup(void);                           // Función de setup
+void limite(void);                         
+void divisor(void);                          // Función para dividir números en dígitos
+void tmr0(void);                            // Función para reiniciar TMR0
+void displays(void);                        // Función para alternar valores mostrados en displays
 
 //-------------Funciones que retornan variables-----------------------
-int  tabla(int a);                              // Tabla para traducir valores a displays de 7 segmentos
-int  tabla_p(int a);                            // Tabla que traduce valores a displays de 7 segmentos pero con punto decimal incluido
+int  tabla(int a);                          // Tabla para traducir valores a displays de 7 segmentos
 
 //----------------------Interrupciones--------------------------------
 void __interrupt() isr(void){
     if(PIR1bits.ADIF){
-        if(ADCON0bits.CHS == 1){                // Si el channel es 1 (puerto AN1)
-            CCPR2L = (ADRESH>>1)+124;           // ADRESH = CCPR2L (duty cycle de 118 a 255)
-            CCP2CONbits.DC2B1 = ADRESH & 0b01;  
-            CCP2CONbits.DC2B0 = (ADRESL>>7);
-            
+        if(ADCON0bits.CHS == 5){            // Si el channel es 1 (puerto AN1)
+            unidades = ADRESH;                 // Valor analógico traducido = cont_vol
+            divisor();
         }
-        else if (ADCON0bits.CHS == 0){          // Si input channel = 0 (puerto AN0)
-            CCPR1L = (ADRESH>>1)+124;           // ADRESH = CCPR1L (duty cycle de 131 a 255)
-            CCP1CONbits.DC1B1 = ADRESH & 0b01;  
-            CCP1CONbits.DC1B0 = (ADRESL>>7);
-        } 
-        else if (ADCON0bits.CHS == 2){
-            limite = ADRESH;
-        }
-        PIR1bits.ADIF = 0;                      // Limpiar bander de interrupción ADC
+        else{
+            PORTB = ADRESH;                 // Si channel select = 0
+        }                                   //   entonces asignar PORTC = ADRESH
+        PIR1bits.ADIF = 0;                  // Limpiar bander de interrupción ADC
     }
     if(T0IF){
-        tmr0();                                 // Reiniciar TMR0
-        cont++;                                 // Aumentar contador en cada interrupción de timer 0
-        if(cont >= limite){
-            PORTCbits.RC3 = 0;                  // Si cont >= valor traducido de potenciómetro, entonces RC3 = 0
-        }
-        else {
-            PORTCbits.RC3 = 1;                  // PORTC, bit 3 = 1
-        }
+        tmr0();                             // Mostrar displays en interrupción de Timer 0
+        displays();
     }
 }
 
 //----------------------Main Loop--------------------------------
 void main(void) {
-    setup();                                    // Subrutina de setup
-    ADCON0bits.GO = 1;                          // Comenzar conversión ADC 
+    setup();                                // Subrutina de setup
+    ADCON0bits.GO = 1;                      // Comenzar conversión ADC 
     while(1){
-        if(ADCON0bits.GO == 0){                 // Si bit GO = 0
-            if(ADCON0bits.CHS == 2){            // Si Input Channel = AN1
-                ADCON0bits.CHS = 1;             // Asignar input Channel = AN0
-                __delay_us(50);                 // Delay de 50 ms
+        if(ADCON0bits.GO == 0){             // Si bit GO = 0
+            if(ADCON0bits.CHS == 6){        // Si Input Channel = AN1
+                ADCON0bits.CHS = 5;         // Asignar input Channel = AN0
+                __delay_us(50);             // Delay de 50 us
             }
-            else if (ADCON0bits.CHS == 1){      // Si Input Channel = AN0
-                ADCON0bits.CHS = 0;             // Asignar Input Channel = AN1
-                __delay_us(50);                 // Delay de 50 ms
-            }
-            else {
-                ADCON0bits.CHS = 2;
+            else{                           // Si Input Channel = AN0
+                ADCON0bits.CHS = 6;         // Asignar Input Channel = AN1
                 __delay_us(50);
             }
             __delay_us(50);
-            ADCON0bits.GO = 1;                  // Asignar bit GO = 1
-        } 
+            ADCON0bits.GO = 1;              // Asignar bit GO = 1
+        }
     }
 }
 
@@ -113,79 +100,130 @@ void main(void) {
 void setup(void){
     
     //Configuración de entradas y salidas
-    ANSEL = 0b00000111;                         // Pines 0 y 1 de PORTA como analógicos
+    ANSEL = 0b00100000;                     // Pines 0 y 1 de PORTA como analógicos
     ANSELH = 0;
     
-    TRISA = 0b00000111;                         // PORTA, bit 0 y 1 como entrada analógica
-    TRISC = 0;                                  // PORTC como salida
-    TRISD = 0;                                  // PORTD como salida                           
-    TRISE = 0;                                  // PORTE como salida
+    TRISA = 0;                              // PORTA, bit 0 y 1 como entrada analógica
+    TRISC = 0;                              // PORTC como salida
+    TRISD = 0;                              // PORTD como salida                           
+    TRISE = 0b0001;                         // PORTE como salida
     
-    PORTD = 0;                                  // Limpiar PORTD
-    PORTC = 0;                                  // Limpiar PORTC
-    PORTE = 0;                                  // Limpiar PORTE
+    PORTA = 0;                              // Limpiar PORTA
+    PORTD = 0;                              // Limpiar PORTD
+    PORTC = 0;                              // Limpiar PORTC
+    PORTE = 0;                              // Limpiar PORTE
     
     //Configuración de oscilador
-    OSCCONbits.IRCF = 0b0111;                   // Oscilador a 8 MHz = 111
+    OSCCONbits.IRCF = 0b0110;               // Oscilador a 4 MHz = 110
     OSCCONbits.SCS = 1;
     
     //Configuración de TMR0
-    OPTION_REGbits.T0CS = 0;                    // bit 5  TMR0 Clock Source Select bit...0 = Internal Clock (CLKO) 1 = Transition on T0CKI pin
-    OPTION_REGbits.T0SE = 0;                    // bit 4 TMR0 Source Edge Select bit 0 = low/high 1 = high/low
-    OPTION_REGbits.PSA = 1;                     // bit 3  Prescaler Assignment bit...0 = Prescaler is assigned to the WDT
-    OPTION_REGbits.PS2 = 0;                     // bits 2-0  PS2:PS0: Prescaler Rate Select bits
-    OPTION_REGbits.PS1 = 0;
-    OPTION_REGbits.PS0 = 0;
-    TMR0 = valor_tmr0;                          // preset for timer register
+    OPTION_REGbits.T0CS = 0;                // bit 5  TMR0 Clock Source Select bit...0 = Internal Clock (CLKO) 1 = Transition on T0CKI pin
+    OPTION_REGbits.T0SE = 0;                // bit 4 TMR0 Source Edge Select bit 0 = low/high 1 = high/low
+    OPTION_REGbits.PSA = 0;                 // bit 3  Prescaler Assignment bit...0 = Prescaler is assigned to the Timer0
+    OPTION_REGbits.PS2 = 1;                 // bits 2-0  PS2:PS0: Prescaler Rate Select bits
+    OPTION_REGbits.PS1 = 1;
+    OPTION_REGbits.PS0 = 1;
+    TMR0 = valor_tmr0;                      // preset for timer register
     
     //Configuración del ADC
-    ADCON1bits.ADFM = 0;                        // Resultado justificado a la izquierda
-    ADCON1bits.VCFG0 = 0;                       // Voltaje 0 de referencia = VSS
-    ADCON1bits.VCFG1 = 0;                       // Voltaje 1 de referencia = VDD
+    ADCON1bits.ADFM = 0;                    // Resultado justificado a la izquierda
+    ADCON1bits.VCFG0 = 0;                   // Voltaje 0 de referencia = VSS
+    ADCON1bits.VCFG1 = 0;                   // Voltaje 1 de referencia = VDD
     
-    ADCON0bits.ADCS = 0b10;                     // Conversión ADC generada con FOSC/32
-    ADCON0bits.CHS = 0;                         // Input Channel = AN0
-    ADCON0bits.ADON = 1;                        // ADC = enabled
-    __delay_us(200);
+    ADCON0bits.ADCS = 0b01;                 // Conversión ADC generada a 2us
+    ADCON0bits.CHS = 5;                     // Input Channel = AN0
+    ADCON0bits.ADON = 1;                    // ADC = enabled
+    __delay_us(50);
     
     //Configuración de interrupciones
-    INTCONbits.T0IF = 0;                        // Habilitada la bandera de TIMER 0      
-    INTCONbits.T0IE = 1;                        // Habilitar las interrupciones de TIMER 0
-    INTCONbits.GIE = 1;                         // Habilitar interrupciones globales
-    PIR1bits.ADIF = 0;                          // Limpiar bandera de interrupción del ADC
-    PIE1bits.ADIE = 1;                          // Interrupción ADC = enabled
-    INTCONbits.PEIE = 1;                        // Interrupciones periféricas activadas
-    
-    //Configuración de PWM
-    TRISCbits.TRISC2 = 1;                       // RC2/CCP1 como entrada
-    TRISCbits.TRISC1 = 1;                       // RC1/CCP2 como entrada
-    PR2 = 255;                                  // Frecuencia de TMR2 = 2 us
-    CCP1CONbits.P1M = 0;                        // Solo una salida en CCP1
-    CCP1CONbits.CCP1M = 0b1100;                 // Modo de PWM
-    CCP2CONbits.CCP2M = 0b1100;                 // Modo de PWM para CCP2
-        
-    CCPR1L = 0x0f;                              // Duty cicle inicial del PWM en CCP1 y CCP2
-    CCPR2L = 0x0f;
-    CCP2CONbits.DC2B0 = 0;                      // Bits menos significativos de CCP2
-    CCP2CONbits.DC2B1 = 0;
-    CCP1CONbits.DC1B = 0;                       // Bits menor significativos de CCP1
-    
-    //Configuración del Timer 2
-    PIR1bits.TMR2IF = 0;                        // Limpiar bandera de TMR2
-    T2CONbits.T2CKPS = 0b11;                    // Prescaler en 1:16
-    T2CONbits.TMR2ON = 1;
-    
-    while(PIR1bits.TMR2IF == 0);                // Esperar un ciclo de TMR2
-    PIR1bits.TMR2IF = 0;                        // Limpiar bandera de TMR2
-    
-    TRISCbits.TRISC2 = 0;                       // Salida 1 del PWM en RC2
-    TRISCbits.TRISC1 = 0;                       // Salida 2 del PWM en RC1
+    INTCONbits.T0IF = 0;                    // Habilitada la bandera de TIMER 0      
+    INTCONbits.T0IE = 1;                    // Habilitar las interrupciones de TIMER 0
+    INTCONbits.GIE = 1;                     // Habilitar interrupciones globales
+    PIR1bits.ADIF = 0;                      // Limpiar bandera de interrupción del ADC
+    PIE1bits.ADIE = 1;                      // Interrupción ADC = enabled
+    INTCONbits.PEIE = 1;                    // Interrupciones periféricas activadas
     
     return;
 }
 
 void tmr0(void){
-    INTCONbits.T0IF = 0;                        // Limpiar bandera de TIMER 0
-    TMR0 = valor_tmr0;                          // TMR0 = 255
+    INTCONbits.T0IF = 0;                    // Limpiar bandera de TIMER 0
+    TMR0 = valor_tmr0;                      // TMR0 = 237
     return;
+}
+
+void divisor(void){
+    for(int i = 0; i<3 ; i++){              // De i = 0 hasta i = 2
+        dig[i] = unidades % 16;             // array[i] = cont_vol mod 16(retornar residuo). Devuelve digito por dígito de un número.
+        unidades = (unidades - dig[i])/16;  // unidades = valor sin último digito.
+    }
+}
+
+void displays(void){
+    PORTD = disp_selector;                  // PORTD = 0b001
+    if(disp_selector == 0b001){             // Si disp_selector = 0b001
+        PORTC = tabla(dig[0]);              // PORTC = valor traducido de posición 0 de array dig[]
+        disp_selector = 0b010;              // disp_selector = 0b010
+    }
+    else if(disp_selector == 0b010){        // Si disp_selector = 0b010
+        PORTC = tabla(dig[1]);              // PORTC = valor traducido de posición 1 de array dig[]
+        disp_selector = 0b001;              // disp_selector = 0b100
+    }
+}
+
+int tabla(int a){
+    switch (a){                             // Ingresar valor de "a" a switch case
+        case 0:                             // Si a = 0
+            return 0b00111111;              // devolver valor 0b00111111
+            break;
+        case 1:                             // Si a = 1
+            return 0b00000110;              // devolver valor 0b00000110 
+            break;
+        case 2:                             // Si a = 2
+            return 0b01011011;              // devolver valor 0b01011011
+            break;
+        case 3:                             // Si a = 3
+            return 0b01001111;              // devolver valor 0b01001111
+            break;
+        case 4:                             // Si a = 4
+            return 0b01100110;              // devolver valor 0b01100110
+            break;
+        case 5:                             // Si a = 5
+            return 0b01101101;              // devolver valor 0b01101101
+            break;
+        case 6:                             // Si a = 6
+            return 0b01111101;              // devolver valor 0b01111101
+            break;
+        case 7:                             // Si a = 7
+            return 0b00000111;              // devolver valor 0b01111101
+            break;
+        case 8:                             // Si a = 8
+            return 0b01111111;              // devolver valor 0b01111111
+            break;
+        case 9:                             // Si a = 9
+            return 0b01101111;              // devolver valor 0b01101111
+            break;
+        case 10:                            // Si a = 10 (letra A)
+            return 0b01110111;              // devolver valor 0b01110111
+            break;
+        case 11:                            // Si a = 11 (letra B)
+            return 0b01111100;              // devolver valor 0b01111100
+            break;
+        case 12:                            // Si a = 12 (letra C)
+            return 0b00111001;              // devolver valor 0b00111001
+            break;
+        case 13:                            // Si a = 13 (letra D)
+            return 0b01011110;              // devolver valor 0b01011110
+            break;
+        case 14:                            // Si a = 14 (letra E)
+            return 0b01111001;              // devolver valor 0b01111001
+            break;
+        case 15:                            // Si a = 15 (letra F)
+            return 0b01110001;              // devolver valor 0b01110001
+            break;
+        default:
+            break;
+            
+    }
 }
