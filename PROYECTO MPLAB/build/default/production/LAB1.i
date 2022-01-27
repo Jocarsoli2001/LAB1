@@ -2745,30 +2745,26 @@ extern int sprintf(char *, const char *, ...);
 extern int printf(const char *, ...);
 # 35 "LAB1.c" 2
 # 44 "LAB1.c"
-int cont2 = 0;
-int cont_vol = 0;
-uint8_t digi = 0;
 uint8_t disp_selector = 0b001;
-int dig[3];
 int unidades = 0;
 int decenas = 0;
+int dig[3];
 
 
 void setup(void);
-void divisor(void);
+void divisor_hex(void);
 void tmr0(void);
 void displays(void);
 
 
 int tabla(int a);
-int tabla_p(int a);
 
 
 void __attribute__((picinterrupt(("")))) isr(void){
     if(PIR1bits.ADIF){
-        if(ADCON0bits.CHS == 1){
-            cont_vol = 2*ADRESH;
-            divisor();
+        if(ADCON0bits.CHS == 5){
+            unidades = ADRESH;
+            divisor_hex();
         }
         else{
             PORTB = ADRESH;
@@ -2787,12 +2783,12 @@ void main(void) {
     ADCON0bits.GO = 1;
     while(1){
         if(ADCON0bits.GO == 0){
-            if(ADCON0bits.CHS == 1){
-                ADCON0bits.CHS = 0;
+            if(ADCON0bits.CHS == 6){
+                ADCON0bits.CHS = 5;
                 _delay((unsigned long)((50)*(4000000/4000000.0)));
             }
             else{
-                ADCON0bits.CHS = 1;
+                ADCON0bits.CHS = 6;
                 _delay((unsigned long)((50)*(4000000/4000000.0)));
             }
             _delay((unsigned long)((50)*(4000000/4000000.0)));
@@ -2805,13 +2801,13 @@ void main(void) {
 void setup(void){
 
 
-    ANSEL = 0b00000011;
+    ANSEL = 0b00100000;
     ANSELH = 0;
 
-    TRISA = 0b00000011;
+    TRISA = 0;
     TRISC = 0;
     TRISD = 0;
-    TRISE = 0;
+    TRISE = 0b0001;
 
     PORTA = 0;
     PORTD = 0;
@@ -2837,7 +2833,7 @@ void setup(void){
     ADCON1bits.VCFG1 = 0;
 
     ADCON0bits.ADCS = 0b01;
-    ADCON0bits.CHS = 0;
+    ADCON0bits.CHS = 5;
     ADCON0bits.ADON = 1;
     _delay((unsigned long)((50)*(4000000/4000000.0)));
 
@@ -2858,10 +2854,10 @@ void tmr0(void){
     return;
 }
 
-void divisor(void){
+void divisor_hex(void){
     for(int i = 0; i<3 ; i++){
-        dig[i] = cont_vol % 10;
-        cont_vol = (cont_vol - dig[i])/10;
+        dig[i] = unidades % 16;
+        unidades = (unidades - dig[i])/16;
     }
 }
 
@@ -2873,10 +2869,6 @@ void displays(void){
     }
     else if(disp_selector == 0b010){
         PORTC = tabla(dig[1]);
-        disp_selector = 0b100;
-    }
-    else if(disp_selector == 0b100){
-        PORTC = tabla_p(dig[2]);
         disp_selector = 0b001;
     }
 }
@@ -2913,43 +2905,23 @@ int tabla(int a){
         case 9:
             return 0b01101111;
             break;
-        default:
+        case 10:
+            return 0b01110111;
             break;
-
-    }
-}
-
-int tabla_p(int a){
-    switch (a){
-        case 0:
-            return 0b10111111;
+        case 11:
+            return 0b01111100;
             break;
-        case 1:
-            return 0b10000110;
+        case 12:
+            return 0b00111001;
             break;
-        case 2:
-            return 0b11011011;
+        case 13:
+            return 0b01011110;
             break;
-        case 3:
-            return 0b11001111;
+        case 14:
+            return 0b01111001;
             break;
-        case 4:
-            return 0b11100110;
-            break;
-        case 5:
-            return 0b11101101;
-            break;
-        case 6:
-            return 0b11111101;
-            break;
-        case 7:
-            return 0b10000111;
-            break;
-        case 8:
-            return 0b11111111;
-            break;
-        case 9:
-            return 0b11101111;
+        case 15:
+            return 0b01110001;
             break;
         default:
             break;

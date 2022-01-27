@@ -38,33 +38,29 @@
 #define _XTAL_FREQ 4000000
 
 //-----------------------Constantes----------------------------------
-#define  valor_tmr0 237                     // valor_tmr0 = 237
+#define  valor_tmr0 237                    // valor_tmr0 = 237
 
 //-----------------------Variables------------------------------------
-int cont2 = 0;
-int cont_vol = 0;
-uint8_t digi = 0;
 uint8_t  disp_selector = 0b001;
-int dig[3];
 int unidades = 0;
 int decenas = 0;
+int dig[3];
 
 //------------Funciones sin retorno de variables----------------------
 void setup(void);                           // Función de setup
-void divisor(void);                         // Función para dividir números en dígitos
+void divisor_hex(void);                     // Función para dividir números hexadecimales en dígitos
 void tmr0(void);                            // Función para reiniciar TMR0
 void displays(void);                        // Función para alternar valores mostrados en displays
 
 //-------------Funciones que retornan variables-----------------------
 int  tabla(int a);                          // Tabla para traducir valores a displays de 7 segmentos
-int  tabla_p(int a);                        // Tabla que traduce valores a displays de 7 segmentos pero con punto decimal incluido
 
 //----------------------Interrupciones--------------------------------
 void __interrupt() isr(void){
     if(PIR1bits.ADIF){
-        if(ADCON0bits.CHS == 1){            // Si el channel es 1 (puerto AN1)
-            cont_vol = 2*ADRESH;            // Valor analógico traducido = cont_vol
-            divisor();                      // Llamar subrutina de divisor
+        if(ADCON0bits.CHS == 5){            // Si el channel es 1 (puerto AN1)
+            unidades = ADRESH;                 // Valor analógico traducido = cont_vol
+            divisor_hex();
         }
         else{
             PORTB = ADRESH;                 // Si channel select = 0
@@ -83,17 +79,17 @@ void main(void) {
     ADCON0bits.GO = 1;                      // Comenzar conversión ADC 
     while(1){
         if(ADCON0bits.GO == 0){             // Si bit GO = 0
-            if(ADCON0bits.CHS == 1){        // Si Input Channel = AN1
-                ADCON0bits.CHS = 0;         // Asignar input Channel = AN0
-                __delay_us(50);             // Delay de 50 ms
+            if(ADCON0bits.CHS == 6){        // Si Input Channel = AN1
+                ADCON0bits.CHS = 5;         // Asignar input Channel = AN0
+                __delay_us(50);             // Delay de 50 us
             }
             else{                           // Si Input Channel = AN0
-                ADCON0bits.CHS = 1;         // Asignar Input Channel = AN1
+                ADCON0bits.CHS = 6;         // Asignar Input Channel = AN1
                 __delay_us(50);
             }
             __delay_us(50);
             ADCON0bits.GO = 1;              // Asignar bit GO = 1
-        } 
+        }
     }
 }
 
@@ -101,13 +97,13 @@ void main(void) {
 void setup(void){
     
     //Configuración de entradas y salidas
-    ANSEL = 0b00000011;                     // Pines 0 y 1 de PORTA como analógicos
+    ANSEL = 0b00100000;                     // Pines 0 y 1 de PORTA como analógicos
     ANSELH = 0;
     
-    TRISA = 0b00000011;                     // PORTA, bit 0 y 1 como entrada analógica
+    TRISA = 0;                              // PORTA, bit 0 y 1 como entrada analógica
     TRISC = 0;                              // PORTC como salida
     TRISD = 0;                              // PORTD como salida                           
-    TRISE = 0;                              // PORTE como salida
+    TRISE = 0b0001;                         // PORTE como salida
     
     PORTA = 0;                              // Limpiar PORTA
     PORTD = 0;                              // Limpiar PORTD
@@ -133,7 +129,7 @@ void setup(void){
     ADCON1bits.VCFG1 = 0;                   // Voltaje 1 de referencia = VDD
     
     ADCON0bits.ADCS = 0b01;                 // Conversión ADC generada a 2us
-    ADCON0bits.CHS = 0;                     // Input Channel = AN0
+    ADCON0bits.CHS = 5;                     // Input Channel = AN0
     ADCON0bits.ADON = 1;                    // ADC = enabled
     __delay_us(50);
     
@@ -154,26 +150,22 @@ void tmr0(void){
     return;
 }
 
-void divisor(void){
+void divisor_hex(void){
     for(int i = 0; i<3 ; i++){              // De i = 0 hasta i = 2
-        dig[i] = cont_vol % 10;             // array[i] = cont_vol mod 10(retornar residuo). Devuelve digito por dígito de un número.
-        cont_vol = (cont_vol - dig[i])/10;  // cont_vol = valor sin último digito.
+        dig[i] = unidades % 16;             // array[i] = cont_vol mod 16(retornar residuo). Devuelve digito por dígito de un número hexadecimal.
+        unidades = (unidades - dig[i])/16;  // unidades = valor sin último digito.
     }
 }
 
 void displays(void){
-    PORTD = disp_selector;                  // PORTE = 0b001
+    PORTD = disp_selector;                  // PORTD = 0b001
     if(disp_selector == 0b001){             // Si disp_selector = 0b001
-        PORTC = tabla(dig[0]);              // PORTD = valor traducido de posición 0 de array dig[]
+        PORTC = tabla(dig[0]);              // PORTC = valor traducido de posición 0 de array dig[]
         disp_selector = 0b010;              // disp_selector = 0b010
     }
     else if(disp_selector == 0b010){        // Si disp_selector = 0b010
-        PORTC = tabla(dig[1]);              // PORTD = valor traducido de posición 1 de array dig[]
-        disp_selector = 0b100;              // disp_selector = 0b100
-    }
-    else if(disp_selector == 0b100){        // Si disp_selector = 0b100
-        PORTC = tabla_p(dig[2]);            // PORTD = valor traducido de posición 2 de array dig[]
-        disp_selector = 0b001;              // disp_selector = 0b001
+        PORTC = tabla(dig[1]);              // PORTC = valor traducido de posición 1 de array dig[]
+        disp_selector = 0b001;              // disp_selector = 0b100
     }
 }
 
@@ -209,43 +201,23 @@ int tabla(int a){
         case 9:                             // Si a = 9
             return 0b01101111;              // devolver valor 0b01101111
             break;
-        default:
+        case 10:                            // Si a = 10 (letra A)
+            return 0b01110111;              // devolver valor 0b01110111
             break;
-            
-    }
-}
- 
-int tabla_p(int a){
-    switch (a){                             // Ingresar valor de "a" a switch case
-        case 0:                             // Si a = 0
-            return 0b10111111;              // devolver valor 0b10111111
+        case 11:                            // Si a = 11 (letra B)
+            return 0b01111100;              // devolver valor 0b01111100
             break;
-        case 1:                             // Si a = 1
-            return 0b10000110;              // devolver valor 0b10000110 
+        case 12:                            // Si a = 12 (letra C)
+            return 0b00111001;              // devolver valor 0b00111001
             break;
-        case 2:                             // Si a = 2
-            return 0b11011011;              // devolver valor 0b11011011
+        case 13:                            // Si a = 13 (letra D)
+            return 0b01011110;              // devolver valor 0b01011110
             break;
-        case 3:                             // Si a = 3
-            return 0b11001111;              // devolver valor 0b11001111
+        case 14:                            // Si a = 14 (letra E)
+            return 0b01111001;              // devolver valor 0b01111001
             break;
-        case 4:                             // Si a = 4
-            return 0b11100110;              // devolver valor 0b11100110
-            break;
-        case 5:                             // Si a = 5
-            return 0b11101101;              // devolver valor 0b11101101
-            break;
-        case 6:                             // Si a = 6
-            return 0b11111101;              // devolver valor 0b11111101
-            break;
-        case 7:                             // Si a = 7
-            return 0b10000111;              // devolver valor 0b11111101
-            break;
-        case 8:                             // Si a = 8
-            return 0b11111111;              // devolver valor 0b11111111
-            break;
-        case 9:                             // Si a = 9
-            return 0b11101111;              // devolver valor 0b11101111
+        case 15:                            // Si a = 15 (letra F)
+            return 0b01110001;              // devolver valor 0b01110001
             break;
         default:
             break;
